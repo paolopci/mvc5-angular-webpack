@@ -6,7 +6,7 @@ namespace WebCore9.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public sealed class HealthController : ControllerBase
+public sealed class HealthController : ApiControllerBase
 {
     private readonly IHealthService _healthService;
     private readonly IHostEnvironment _environment;
@@ -18,9 +18,10 @@ public sealed class HealthController : ControllerBase
     }
 
     [HttpGet]
-    public ActionResult<HealthStatusDto> Get()
+    [ProducesResponseType(typeof(ApiResponse<HealthStatusDto>), StatusCodes.Status200OK)]
+    public ActionResult<ApiResponse<HealthStatusDto>> Get()
     {
         var status = _healthService.GetStatus(_environment.EnvironmentName);
-        return Ok(status);
+        return ApiOk(status);
     }
 }

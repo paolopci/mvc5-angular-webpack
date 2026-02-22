@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using WebCore9.Api.Common;
 using WebCore9.Core.Abstractions;
 using WebCore9.Core.Models;
 
@@ -6,7 +7,7 @@ namespace WebCore9.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public sealed class HomeController : ControllerBase
+public sealed class HomeController : ApiControllerBase
 {
     private readonly IHomeService _homeService;
 
@@ -16,39 +17,33 @@ public sealed class HomeController : ControllerBase
     }
 
     [HttpGet]
-    public ActionResult<HomeInfoDto> Get()
+    [ProducesResponseType(typeof(ApiResponse<HomeInfoDto>), StatusCodes.Status200OK)]
+    public ActionResult<ApiResponse<HomeInfoDto>> Get()
     {
         var homeInfo = _homeService.GetHomeInfo();
-        return Ok(homeInfo);
+        return ApiOk(homeInfo);
     }
 
     [HttpGet("modules/{key}")]
-    [ProducesResponseType(typeof(ModuleInfoDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<ModuleInfoDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    public ActionResult<ModuleInfoDto> GetModule(string key)
+    public ActionResult<ApiResponse<ModuleInfoDto>> GetModule(string key)
     {
         var moduleInfo = _homeService.GetModuleInfo(key);
         if (moduleInfo is null)
         {
-            var problem = new ProblemDetails
-            {
-                Title = "Module key not found",
-                Detail = $"Module key '{key}' is not supported.",
-                Status = StatusCodes.Status404NotFound
-            };
-
-            return NotFound(problem);
+            return ApiNotFound(ApiProblemDetailsFactory.ModuleKeyNotFound(key));
         }
 
-        return Ok(moduleInfo);
+        return ApiOk(moduleInfo);
     }
 
     [HttpGet("loader")]
-    [ProducesResponseType(typeof(LoaderInfoDto), StatusCodes.Status200OK)]
-    public ActionResult<LoaderInfoDto> GetLoader()
+    [ProducesResponseType(typeof(ApiResponse<LoaderInfoDto>), StatusCodes.Status200OK)]
+    public ActionResult<ApiResponse<LoaderInfoDto>> GetLoader()
     {
         var loaderInfo = _homeService.GetLoaderInfo();
-        return Ok(loaderInfo);
+        return ApiOk(loaderInfo);
     }
 
 }
