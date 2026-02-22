@@ -42,6 +42,10 @@ Related migration docs (M1 backend):
 - `docs/migration/backend-api-contracts-m1.md`
 - `docs/migration/m1-backend-readiness.md`
 
+Related migration docs (M2 client):
+- `docs/migration/client-legacy-inventory-m2a.md`
+- `docs/migration/client-modern-strategy-m2b.md`
+
 Recommend to use Visual Studio Code for Angular development and Visual Studio 2017 to run the MVC application.
 
 The repository came up after I answered a question on [Stackoverflow](https://stackoverflow.com/a/47918737/3375906)
