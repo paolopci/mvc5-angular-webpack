@@ -6,7 +6,5 @@ public interface IHomeService
 {
     HomeInfoDto GetHomeInfo();
 
-    ModuleInfoDto GetModule1Info();
-
-    ModuleInfoDto GetModule2Info();
+    ModuleInfoDto? GetModuleInfo(string key);
 }

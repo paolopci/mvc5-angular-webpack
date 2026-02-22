@@ -21,27 +21,32 @@ public sealed class HomeService : IHomeService
         };
     }
 
-    public ModuleInfoDto GetModule1Info()
+    public ModuleInfoDto? GetModuleInfo(string key)
     {
-        return new ModuleInfoDto
+        if (string.IsNullOrWhiteSpace(key))
         {
-            RouteKey = "module1",
-            Title = "Module 1",
-            ScriptFiles = [.. SharedScripts, "~/Scripts/ng2/module1.js"],
-            RootElementTag = "my-angular-app",
-            LoadingText = "Loading...."
-        };
-    }
+            return null;
+        }
 
-    public ModuleInfoDto GetModule2Info()
-    {
-        return new ModuleInfoDto
+        return key.Trim().ToLowerInvariant() switch
         {
-            RouteKey = "module2",
-            Title = "Module 2",
-            ScriptFiles = [.. SharedScripts, "~/Scripts/ng2/module2.js"],
-            RootElementTag = "tour-of-heroes",
-            LoadingText = "Loading...."
+            "module1" => new ModuleInfoDto
+            {
+                RouteKey = "module1",
+                Title = "Module 1",
+                ScriptFiles = [.. SharedScripts, "~/Scripts/ng2/module1.js"],
+                RootElementTag = "my-angular-app",
+                LoadingText = "Loading...."
+            },
+            "module2" => new ModuleInfoDto
+            {
+                RouteKey = "module2",
+                Title = "Module 2",
+                ScriptFiles = [.. SharedScripts, "~/Scripts/ng2/module2.js"],
+                RootElementTag = "tour-of-heroes",
+                LoadingText = "Loading...."
+            },
+            _ => null
         };
     }
 }

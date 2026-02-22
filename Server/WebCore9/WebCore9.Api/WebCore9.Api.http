@@ -19,3 +19,18 @@ GET {{WebCore9.Api_HostAddress}}/api/home/module2
 Accept: application/json
 
 ###
+
+GET {{WebCore9.Api_HostAddress}}/api/home/modules/module1
+Accept: application/json
+
+###
+
+GET {{WebCore9.Api_HostAddress}}/api/home/modules/module2
+Accept: application/json
+
+###
+
+GET {{WebCore9.Api_HostAddress}}/api/home/modules/invalid
+Accept: application/json
+
+###

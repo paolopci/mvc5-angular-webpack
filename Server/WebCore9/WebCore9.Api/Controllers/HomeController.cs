@@ -22,17 +22,32 @@ public sealed class HomeController : ControllerBase
         return Ok(homeInfo);
     }
 
+    [HttpGet("modules/{key}")]
+    public ActionResult<ModuleInfoDto> GetModule(string key)
+    {
+        var moduleInfo = _homeService.GetModuleInfo(key);
+        if (moduleInfo is null)
+        {
+            return NotFound(new
+            {
+                message = "Module key not found.",
+                key
+            });
+        }
+
+        return Ok(moduleInfo);
+    }
+
+    // Compatibilita temporanea con i client che usano gli endpoint non parametrizzati.
     [HttpGet("module1")]
     public ActionResult<ModuleInfoDto> GetModule1()
     {
-        var moduleInfo = _homeService.GetModule1Info();
-        return Ok(moduleInfo);
+        return GetModule("module1");
     }
 
     [HttpGet("module2")]
     public ActionResult<ModuleInfoDto> GetModule2()
     {
-        var moduleInfo = _homeService.GetModule2Info();
-        return Ok(moduleInfo);
+        return GetModule("module2");
     }
 }
