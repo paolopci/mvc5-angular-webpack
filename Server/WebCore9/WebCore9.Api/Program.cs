@@ -1,11 +1,12 @@
-using WebCore9.Core.Abstractions;
-using WebCore9.Infrastructure.Services;
+using WebCore9.Core;
+using WebCore9.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
-builder.Services.AddScoped<IHealthService, HealthService>();
+builder.Services.AddCoreServices();
+builder.Services.AddInfrastructureServices();
 
 var app = builder.Build();
 

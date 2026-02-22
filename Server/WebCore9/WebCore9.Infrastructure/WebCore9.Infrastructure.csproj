@@ -1,7 +1,11 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\WebCore9.Core\WebCore9.Core.csproj" />
+    <ProjectReference Include="..\\WebCore9.Core\\WebCore9.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.13" />
   </ItemGroup>
 
   <PropertyGroup>
