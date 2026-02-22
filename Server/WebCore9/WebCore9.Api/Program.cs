@@ -1,21 +1,16 @@
 using WebCore9.Core;
 using WebCore9.Infrastructure;
+using WebCore9.Api;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
-builder.Services.AddOpenApi();
+builder.Services.AddApiServices();
 builder.Services.AddCoreServices();
 builder.Services.AddInfrastructureServices();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
-
 app.UseHttpsRedirection();
-app.MapControllers();
+app.MapApiEndpoints();
 
 app.Run();
