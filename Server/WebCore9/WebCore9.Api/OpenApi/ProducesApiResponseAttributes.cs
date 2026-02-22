@@ -4,10 +4,73 @@ using WebCore9.Core.Models;
 namespace WebCore9.Api.OpenApi;
 
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
-public sealed class ProducesApiOkResponseAttribute : ProducesResponseTypeAttribute
+public class ProducesApiOkResponseAttribute : ProducesResponseTypeAttribute
 {
     public ProducesApiOkResponseAttribute(Type dataType)
         : base(typeof(ApiResponse<>).MakeGenericType(dataType), StatusCodes.Status200OK)
+    {
+    }
+}
+
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+public sealed class ProducesApiHealthResponseAttribute : ProducesApiOkResponseAttribute
+{
+    public ProducesApiHealthResponseAttribute()
+        : base(typeof(HealthStatusDto))
+    {
+    }
+}
+
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+public sealed class ProducesApiHomeInfoResponseAttribute : ProducesApiOkResponseAttribute
+{
+    public ProducesApiHomeInfoResponseAttribute()
+        : base(typeof(HomeInfoDto))
+    {
+    }
+}
+
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+public sealed class ProducesApiModulesListResponseAttribute : ProducesApiOkResponseAttribute
+{
+    public ProducesApiModulesListResponseAttribute()
+        : base(typeof(IReadOnlyList<ModuleInfoDto>))
+    {
+    }
+}
+
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+public sealed class ProducesApiModuleResponseAttribute : ProducesApiOkResponseAttribute
+{
+    public ProducesApiModuleResponseAttribute()
+        : base(typeof(ModuleInfoDto))
+    {
+    }
+}
+
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+public sealed class ProducesApiLoaderResponseAttribute : ProducesApiOkResponseAttribute
+{
+    public ProducesApiLoaderResponseAttribute()
+        : base(typeof(LoaderInfoDto))
+    {
+    }
+}
+
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+public sealed class ProducesApiLoaderChunksResponseAttribute : ProducesApiOkResponseAttribute
+{
+    public ProducesApiLoaderChunksResponseAttribute()
+        : base(typeof(LoaderChunkManifestDto))
+    {
+    }
+}
+
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+public sealed class ProducesApiLoaderHtmlPluginConfigResponseAttribute : ProducesApiOkResponseAttribute
+{
+    public ProducesApiLoaderHtmlPluginConfigResponseAttribute()
+        : base(typeof(LoaderHtmlPluginConfigDto))
     {
     }
 }

@@ -79,6 +79,24 @@ public sealed class HomeService : IHomeService
         };
     }
 
+    public LoaderHtmlPluginConfigDto GetLoaderHtmlPluginConfig()
+    {
+        return new LoaderHtmlPluginConfigDto
+        {
+            RouteKey = "loader-html-plugin-config",
+            SourceConfigFile = "Client/webpack-html-plugin.config.js",
+            TemplateView = "Views/Home/loader.cshtml",
+            GeneratedView = "Views/Home/Module1.cshtml",
+            OutputPath = "Server/WebApplication/Scripts/ng2",
+            OutputFilenamePattern = "[name].[hash].js",
+            SourceMapFilenamePattern = "[name].[hash].js.map",
+            HtmlPluginInject = false,
+            EntryChunkKeys = ["polyfills", "vendors", "module1"],
+            SharedChunkKeys = ["vendors", "polyfills"],
+            ModuleChunkKeys = ["module1"]
+        };
+    }
+
     private static ModuleInfoDto CreateModule1Info()
     {
         return new ModuleInfoDto

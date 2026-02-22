@@ -13,4 +13,6 @@ public interface IHomeService
     LoaderInfoDto GetLoaderInfo();
 
     LoaderChunkManifestDto GetLoaderChunkManifest();
+
+    LoaderHtmlPluginConfigDto GetLoaderHtmlPluginConfig();
 }

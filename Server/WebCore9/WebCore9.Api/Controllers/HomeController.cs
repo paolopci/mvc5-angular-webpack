@@ -18,7 +18,7 @@ public sealed class HomeController : ApiControllerBase
     }
 
     [HttpGet]
-    [ProducesApiOkResponse(typeof(HomeInfoDto))]
+    [ProducesApiHomeInfoResponse]
     public ActionResult<ApiResponse<HomeInfoDto>> Get()
     {
         var homeInfo = _homeService.GetHomeInfo();
@@ -26,7 +26,7 @@ public sealed class HomeController : ApiControllerBase
     }
 
     [HttpGet("modules")]
-    [ProducesApiOkResponse(typeof(IReadOnlyList<ModuleInfoDto>))]
+    [ProducesApiModulesListResponse]
     public ActionResult<ApiResponse<IReadOnlyList<ModuleInfoDto>>> GetModules()
     {
         var modules = _homeService.GetModules();
@@ -34,7 +34,7 @@ public sealed class HomeController : ApiControllerBase
     }
 
     [HttpGet("modules/{key}")]
-    [ProducesApiOkResponse(typeof(ModuleInfoDto))]
+    [ProducesApiModuleResponse]
     [ProducesApiBadRequest]
     [ProducesApiConflict]
     [ProducesApiNotFound]
@@ -68,7 +68,7 @@ public sealed class HomeController : ApiControllerBase
     }
 
     [HttpGet("loader")]
-    [ProducesApiOkResponse(typeof(LoaderInfoDto))]
+    [ProducesApiLoaderResponse]
     [ProducesApiInternalError]
     public ActionResult<ApiResponse<LoaderInfoDto>> GetLoader()
     {
@@ -84,7 +84,7 @@ public sealed class HomeController : ApiControllerBase
     }
 
     [HttpGet("loader/chunks")]
-    [ProducesApiOkResponse(typeof(LoaderChunkManifestDto))]
+    [ProducesApiLoaderChunksResponse]
     [ProducesApiInternalError]
     public ActionResult<ApiResponse<LoaderChunkManifestDto>> GetLoaderChunks()
     {
@@ -96,6 +96,22 @@ public sealed class HomeController : ApiControllerBase
         catch (Exception)
         {
             return ApiProblem(ApiProblemDetailsFactory.InternalError("Unable to resolve loader chunk manifest."));
+        }
+    }
+
+    [HttpGet("loader/html-plugin-config")]
+    [ProducesApiLoaderHtmlPluginConfigResponse]
+    [ProducesApiInternalError]
+    public ActionResult<ApiResponse<LoaderHtmlPluginConfigDto>> GetLoaderHtmlPluginConfig()
+    {
+        try
+        {
+            var htmlPluginConfig = _homeService.GetLoaderHtmlPluginConfig();
+            return ApiOk(htmlPluginConfig);
+        }
+        catch (Exception)
+        {
+            return ApiProblem(ApiProblemDetailsFactory.InternalError("Unable to resolve loader html plugin config."));
         }
     }
 

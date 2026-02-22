@@ -19,7 +19,7 @@ public sealed class HealthController : ApiControllerBase
     }
 
     [HttpGet]
-    [ProducesApiOkResponse(typeof(HealthStatusDto))]
+    [ProducesApiHealthResponse]
     public ActionResult<ApiResponse<HealthStatusDto>> Get()
     {
         var status = _healthService.GetStatus(_environment.EnvironmentName);
