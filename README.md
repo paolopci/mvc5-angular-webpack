@@ -50,6 +50,7 @@ Related migration docs (M2 client):
 
 Related migration docs (M3 slices):
 - `docs/migration/m3a-feature-slice-priority-and-mapping.md`
+- `docs/migration/m3b-ci-cd-transition-plan.md`
 
 Recommend to use Visual Studio Code for Angular development and Visual Studio 2017 to run the MVC application.
 
@@ -108,6 +109,13 @@ Build the modern client:
 
 ```bash
 npm run build
+```
+
+Run modern client quality gates (local CI subset):
+
+```bash
+npm run lint
+npm run test -- --watch=false
 ```
 
 ## Run the Legacy MVC5 + Angular/Webpack Application
