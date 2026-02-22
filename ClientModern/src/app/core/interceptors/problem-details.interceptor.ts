@@ -14,6 +14,10 @@ export const problemDetailsInterceptor: HttpInterceptorFn = (req, next) => {
 
 // Provide a separate exported function to keep error normalization testable and framework-agnostic.
 export function normalizeApiError(error: unknown): AppApiError {
+  if (isAppApiError(error)) {
+    return error;
+  }
+
   if (error instanceof HttpErrorResponse) {
     const problem = isProblemDetails(error.error) ? error.error : undefined;
     return {
@@ -37,4 +41,12 @@ export function normalizeApiError(error: unknown): AppApiError {
 
 function isProblemDetails(value: unknown): value is ProblemDetailsDto {
   return typeof value === 'object' && value !== null;
+}
+
+function isAppApiError(value: unknown): value is AppApiError {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  return 'status' in value && 'title' in value && 'detail' in value;
 }
