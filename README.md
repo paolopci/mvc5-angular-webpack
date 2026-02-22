@@ -37,6 +37,11 @@ The full port is **not complete yet**. Legacy and modern stacks currently coexis
 | CI/CD | No unified migration pipeline documented | Medium | `M1`: split legacy/modern jobs; `M2`: define minimum CI gates (`build`, `test`, smoke) | Medium | `DevEx/CI` (TBD) |
 | Rollout/transition | Hybrid repo without formal rollout plan | Medium | `M1`: define phased rollout; `M2`: define rollback criteria and feature validation gates | High | `Tech Lead` (TBD) |
 
+Related migration docs (M1 backend):
+- `docs/migration/backend-parity-matrix.md`
+- `docs/migration/backend-api-contracts-m1.md`
+- `docs/migration/m1-backend-readiness.md`
+
 Recommend to use Visual Studio Code for Angular development and Visual Studio 2017 to run the MVC application.
 
 The repository came up after I answered a question on [Stackoverflow](https://stackoverflow.com/a/47918737/3375906)
