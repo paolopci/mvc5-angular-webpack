@@ -12,6 +12,15 @@ public class ProducesApiOkResponseAttribute : ProducesResponseTypeAttribute
     }
 }
 
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
+public class ProducesApiCreatedResponseAttribute : ProducesResponseTypeAttribute
+{
+    public ProducesApiCreatedResponseAttribute(Type dataType)
+        : base(typeof(ApiResponse<>).MakeGenericType(dataType), StatusCodes.Status201Created)
+    {
+    }
+}
+
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
 public sealed class ProducesApiHealthResponseAttribute : ProducesApiOkResponseAttribute
 {
@@ -61,6 +70,15 @@ public sealed class ProducesApiHeroesListResponseAttribute : ProducesApiOkRespon
 public sealed class ProducesApiHeroResponseAttribute : ProducesApiOkResponseAttribute
 {
     public ProducesApiHeroResponseAttribute()
+        : base(typeof(HeroDto))
+    {
+    }
+}
+
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+public sealed class ProducesApiCreatedHeroResponseAttribute : ProducesApiCreatedResponseAttribute
+{
+    public ProducesApiCreatedHeroResponseAttribute()
         : base(typeof(HeroDto))
     {
     }

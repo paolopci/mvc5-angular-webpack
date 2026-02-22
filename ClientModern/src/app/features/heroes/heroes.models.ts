@@ -12,3 +12,8 @@ export interface HeroDetailViewModel {
   id: number;
   name: string;
 }
+
+export interface HeroMutationPayload {
+  id?: number;
+  name: string;
+}

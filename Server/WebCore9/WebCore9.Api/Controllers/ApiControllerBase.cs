@@ -10,6 +10,11 @@ public abstract class ApiControllerBase : ControllerBase
         return Ok(ApiResponse<T>.Ok(data));
     }
 
+    protected ActionResult<ApiResponse<T>> ApiCreated<T>(string location, T data)
+    {
+        return Created(location, ApiResponse<T>.Ok(data));
+    }
+
     protected ObjectResult ApiProblem(ProblemDetails problemDetails)
     {
         var statusCode = problemDetails.Status ?? StatusCodes.Status500InternalServerError;

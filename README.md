@@ -51,6 +51,7 @@ Related migration docs (M2 client):
 Related migration docs (M3 slices):
 - `docs/migration/m3a-feature-slice-priority-and-mapping.md`
 - `docs/migration/m3b-ci-cd-transition-plan.md`
+- `docs/migration/m3c-rollout-decommission-plan.md`
 
 Recommend to use Visual Studio Code for Angular development and Visual Studio 2017 to run the MVC application.
 
@@ -103,7 +104,7 @@ Useful routes after startup:
 
 - `http://localhost:4200/health` (M2.C health/status pilot)
 - `http://localhost:4200/modules` (M2.D home modules catalog pilot)
-- `http://localhost:4200/heroes` (M3.A heroes read/search/detail slice)
+- `http://localhost:4200/heroes` (M3.A heroes slice: read/search/detail + CRUD base)
 
 Build the modern client:
 
@@ -117,6 +118,12 @@ Run modern client quality gates (local CI subset):
 npm run lint
 npm run test -- --watch=false
 ```
+
+Migration release / rollout references (M3):
+
+- `docs/migration/m3a-feature-slice-priority-and-mapping.md` (slice status + fallback)
+- `docs/migration/m3b-ci-cd-transition-plan.md` (CI legacy/modern + gates)
+- `docs/migration/m3c-rollout-decommission-plan.md` (parity, rollout, rollback, decommissioning)
 
 ## Run the Legacy MVC5 + Angular/Webpack Application
 

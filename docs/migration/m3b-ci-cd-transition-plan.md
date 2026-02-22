@@ -25,6 +25,7 @@ Job principali:
   - `npm run build`
   - `npm run test -- --watch=false`
   - smoke dist: verifica `dist/ClientModern/browser/index.html`
+  - copre anche la regressione base della shell aggiornata (`/heroes` CRUD UI)
 - `smoke-api`
   - avvia `WebCore9.Api` su HTTP locale (`127.0.0.1:5021`)
   - smoke `GET /api/health`
@@ -52,6 +53,7 @@ Job principali:
   - `build` ✅ bloccante
   - `test` ✅ bloccante
 - Smoke API: `/api/health`, `/api/home` ✅ bloccante
+- API `Heroes` CRUD coperta dai test integrazione backend ✅ bloccante (tramite `WebCore9.Api.IntegrationTests`)
 - Smoke client: dist output `index.html` ✅ bloccante
 
 ### Legacy (transizione)
@@ -81,6 +83,6 @@ La pipeline `ci-legacy.yml` può essere ridotta/rimossa progressivamente quando 
 ## Riduzione Rischio / Note Operative
 
 - `ClientModern` non aveva un gate lint nativo; in questa fase è stato introdotto un gate statico transitorio (`typecheck`) esposto come `npm run lint`.
+- L'estensione `Heroes` CRUD non richiede cambi CI aggiuntivi: rientra gia' nei gate `backend-webcore9` (integration tests) e `client-modern` (build/test).
 - Il job legacy usa `windows-latest` per allinearsi meglio alla validazione locale già eseguita (Node 20 + Webpack 2).
 - Il test backend locale può fallire se `WebCore9.Api` è in esecuzione in debug (file lock); in CI il job parte da ambiente pulito.
-

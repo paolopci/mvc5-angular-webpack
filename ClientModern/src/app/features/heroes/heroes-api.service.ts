@@ -3,7 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { ApiResponse } from '../../core/api/api-contracts';
 import { APP_ENVIRONMENT } from '../../core/config/app-environment.token';
-import { HeroDetailViewModel, HeroDto, HeroListItemViewModel } from './heroes.models';
+import { HeroDetailViewModel, HeroDto, HeroListItemViewModel, HeroMutationPayload } from './heroes.models';
 
 @Injectable({ providedIn: 'root' })
 export class HeroesApiService {
@@ -24,6 +24,24 @@ export class HeroesApiService {
   getHeroById(id: number): Observable<HeroDetailViewModel> {
     return this.http
       .get<ApiResponse<HeroDto>>(`${this.env.apiBaseUrl}/api/heroes/${id}`)
+      .pipe(map((response) => mapHeroDetail(unwrap(response))));
+  }
+
+  createHero(payload: HeroMutationPayload): Observable<HeroDetailViewModel> {
+    return this.http
+      .post<ApiResponse<HeroDto>>(`${this.env.apiBaseUrl}/api/heroes`, payload)
+      .pipe(map((response) => mapHeroDetail(unwrap(response))));
+  }
+
+  updateHero(id: number, payload: HeroMutationPayload): Observable<HeroDetailViewModel> {
+    return this.http
+      .put<ApiResponse<HeroDto>>(`${this.env.apiBaseUrl}/api/heroes/${id}`, payload)
+      .pipe(map((response) => mapHeroDetail(unwrap(response))));
+  }
+
+  deleteHero(id: number): Observable<HeroDetailViewModel> {
+    return this.http
+      .delete<ApiResponse<HeroDto>>(`${this.env.apiBaseUrl}/api/heroes/${id}`)
       .pipe(map((response) => mapHeroDetail(unwrap(response))));
   }
 }

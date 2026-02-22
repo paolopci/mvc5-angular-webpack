@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Http.Json;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using WebCore9.Api.IntegrationTests.TestSupport;
@@ -25,7 +26,7 @@ public sealed class HeroesControllerTests : ApiIntegrationTestBase
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         var data = await ApiResponseTestHelper.LeggiDataSuccessoAsync<IReadOnlyList<HeroDto>>(response);
-        data.Should().HaveCount(10);
+        data.Should().HaveCountGreaterOrEqualTo(10);
         data.Should().Contain(h => h.Id == 11 && h.Name == "Mr. Nice");
         data.Should().Contain(h => h.Id == 20 && h.Name == "Tornado");
     }
@@ -94,5 +95,159 @@ public sealed class HeroesControllerTests : ApiIntegrationTestBase
         payload.Status.Should().Be((int)HttpStatusCode.NotFound);
         payload.Title.Should().Be("Hero not found");
         payload.Detail.Should().Contain("999");
+    }
+
+    [Fact]
+    public async Task PostHero_QuandoPayloadValido_AlloraCreaHeroErestituisce201()
+    {
+        // Arrange
+        var payload = new { name = $"Nuovo Hero {Guid.NewGuid():N}" };
+
+        // Act
+        var response = await Client.PostAsJsonAsync("/api/heroes", payload);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        response.Headers.Location.Should().NotBeNull();
+
+        var created = await ApiResponseTestHelper.LeggiDataSuccessoAsync<HeroDto>(response);
+        created.Id.Should().BeGreaterThan(20);
+        created.Name.Should().Be(payload.name);
+
+        var fetchResponse = await Client.GetAsync($"/api/heroes/{created.Id}");
+        fetchResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task PostHero_QuandoNomeVuoto_AlloraRestituisce400()
+    {
+        // Arrange
+        var payload = new { name = "   " };
+
+        // Act
+        var response = await Client.PostAsJsonAsync("/api/heroes", payload);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var problem = await ApiResponseTestHelper.LeggiProblemDetailsAsync(response);
+        problem.Status.Should().Be((int)HttpStatusCode.BadRequest);
+        problem.Title.Should().Be("Validation failed");
+    }
+
+    [Fact]
+    public async Task PostHero_QuandoNomeDuplicato_AlloraRestituisce409()
+    {
+        // Arrange
+        var payload = new { name = "Mr. Nice" };
+
+        // Act
+        var response = await Client.PostAsJsonAsync("/api/heroes", payload);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        var problem = await ApiResponseTestHelper.LeggiProblemDetailsAsync(response);
+        problem.Status.Should().Be((int)HttpStatusCode.Conflict);
+        problem.Title.Should().Be("Hero conflict");
+    }
+
+    [Fact]
+    public async Task PutHero_QuandoPayloadValido_AlloraAggiornaHeroErestituisce200()
+    {
+        // Arrange
+        var id = 12;
+        var updatedName = $"Narco Updated {Guid.NewGuid():N}"[..20];
+        var payload = new { id, name = updatedName };
+
+        // Act
+        var response = await Client.PutAsJsonAsync($"/api/heroes/{id}", payload);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var updated = await ApiResponseTestHelper.LeggiDataSuccessoAsync<HeroDto>(response);
+        updated.Id.Should().Be(id);
+        updated.Name.Should().Be(updatedName);
+
+        var fetchResponse = await Client.GetAsync($"/api/heroes/{id}");
+        var fetched = await ApiResponseTestHelper.LeggiDataSuccessoAsync<HeroDto>(fetchResponse);
+        fetched.Name.Should().Be(updatedName);
+    }
+
+    [Fact]
+    public async Task PutHero_QuandoBodyIdMismatch_AlloraRestituisce409()
+    {
+        // Arrange
+        var payload = new { id = 999, name = "Mismatch" };
+
+        // Act
+        var response = await Client.PutAsJsonAsync("/api/heroes/12", payload);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        var problem = await ApiResponseTestHelper.LeggiProblemDetailsAsync(response);
+        problem.Status.Should().Be((int)HttpStatusCode.Conflict);
+    }
+
+    [Fact]
+    public async Task PutHero_QuandoIdInesistente_AlloraRestituisce404()
+    {
+        // Arrange
+        var payload = new { id = 999, name = "Ghost Hero" };
+
+        // Act
+        var response = await Client.PutAsJsonAsync("/api/heroes/999", payload);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        var problem = await ApiResponseTestHelper.LeggiProblemDetailsAsync(response);
+        problem.Status.Should().Be((int)HttpStatusCode.NotFound);
+        problem.Title.Should().Be("Hero not found");
+    }
+
+    [Fact]
+    public async Task PutHero_QuandoNomeDuplicato_AlloraRestituisce409()
+    {
+        // Arrange
+        var payload = new { id = 12, name = "Tornado" };
+
+        // Act
+        var response = await Client.PutAsJsonAsync("/api/heroes/12", payload);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        var problem = await ApiResponseTestHelper.LeggiProblemDetailsAsync(response);
+        problem.Status.Should().Be((int)HttpStatusCode.Conflict);
+    }
+
+    [Fact]
+    public async Task DeleteHero_QuandoIdValido_AlloraRimuoveHeroErestituisce200()
+    {
+        // Arrange
+        var createResponse = await Client.PostAsJsonAsync("/api/heroes", new { name = $"Delete Me {Guid.NewGuid():N}" });
+        var created = await ApiResponseTestHelper.LeggiDataSuccessoAsync<HeroDto>(createResponse);
+
+        // Act
+        var deleteResponse = await Client.DeleteAsync($"/api/heroes/{created.Id}");
+
+        // Assert
+        deleteResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var deleted = await ApiResponseTestHelper.LeggiDataSuccessoAsync<HeroDto>(deleteResponse);
+        deleted.Id.Should().Be(created.Id);
+
+        var fetchResponse = await Client.GetAsync($"/api/heroes/{created.Id}");
+        fetchResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task DeleteHero_QuandoIdInesistente_AlloraRestituisce404()
+    {
+        // Arrange
+
+        // Act
+        var response = await Client.DeleteAsync("/api/heroes/99999");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        var problem = await ApiResponseTestHelper.LeggiProblemDetailsAsync(response);
+        problem.Status.Should().Be((int)HttpStatusCode.NotFound);
     }
 }

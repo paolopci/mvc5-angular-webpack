@@ -9,4 +9,10 @@ public interface IHeroService
     IReadOnlyList<HeroDto> SearchHeroes(string? name, int? id);
 
     HeroDto? GetHeroById(int id);
+
+    HeroMutationResult CreateHero(string? name);
+
+    HeroMutationResult UpdateHero(int id, string? name);
+
+    HeroMutationResult DeleteHero(int id);
 }
