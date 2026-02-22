@@ -27,6 +27,11 @@ Accept: application/json
 
 ###
 
+GET {{WebCore9.Api_HostAddress}}/api/home/loader/config-diff
+Accept: application/json
+
+###
+
 GET {{WebCore9.Api_HostAddress}}/api/home/modules/module1
 Accept: application/json
 

@@ -1,0 +1,69 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build WebCore9.Api",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "build",
+        "${workspaceFolder}/Server/WebCore9/WebCore9.Api/WebCore9.Api.csproj"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "test WebCore9.Api.IntegrationTests",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "test",
+        "${workspaceFolder}/Server/WebCore9/WebCore9.Api.IntegrationTests/WebCore9.Api.IntegrationTests.csproj"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": "test"
+    },
+    {
+      "label": "client: npm install",
+      "type": "process",
+      "command": "npm",
+      "args": [
+        "install"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/Client"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "client: npm run dev",
+      "type": "process",
+      "command": "npm",
+      "args": [
+        "run",
+        "dev"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/Client"
+      },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "client: npm run build:prod",
+      "type": "process",
+      "command": "npm",
+      "args": [
+        "run",
+        "build:prod"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/Client"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

@@ -50,6 +50,32 @@ public sealed class HomeControllerLoaderTests : ApiIntegrationTestBase
     }
 
     [Fact]
+    public async Task GetLoaderChunks_QuandoConfrontatoConHtmlPluginConfig_AlloraMetadatiChunkSonoCoerenti()
+    {
+        // Arrange
+
+        // Act
+        var chunksResponse = await Client.GetAsync("/api/home/loader/chunks");
+        var htmlPluginResponse = await Client.GetAsync("/api/home/loader/html-plugin-config");
+
+        // Assert
+        chunksResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        htmlPluginResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var chunks = await ApiResponseTestHelper.LeggiDataSuccessoAsync<LoaderChunkManifestDto>(chunksResponse);
+        var htmlPluginConfig = await ApiResponseTestHelper.LeggiDataSuccessoAsync<LoaderHtmlPluginConfigDto>(htmlPluginResponse);
+
+        htmlPluginConfig.TemplateView.Should().Be(chunks.LegacyView);
+        htmlPluginConfig.OutputFilenamePattern.Should().Be(chunks.OutputFilenamePattern);
+        htmlPluginConfig.SourceMapFilenamePattern.Should().Be(chunks.SourceMapFilenamePattern);
+        chunks.AllKnownChunkKeys.Should().Contain(htmlPluginConfig.EntryChunkKeys);
+        chunks.ModuleChunkKeys.Should().Contain(htmlPluginConfig.ModuleChunkKeys);
+        chunks.SharedChunkKeys.Should().Contain(htmlPluginConfig.SharedChunkKeys);
+        htmlPluginConfig.EntryChunkKeys.Should().Contain(chunks.DefaultModuleChunkKey);
+        htmlPluginConfig.ModuleChunkKeys.Should().ContainSingle().Which.Should().Be("module1");
+    }
+
+    [Fact]
     public async Task GetLoaderHtmlPluginConfig_QuandoRichiesto_AlloraRestituisce200ConMetadatiHtmlPlugin()
     {
         // Arrange
@@ -68,5 +94,31 @@ public sealed class HomeControllerLoaderTests : ApiIntegrationTestBase
         data.HtmlPluginInject.Should().BeFalse();
         data.EntryChunkKeys.Should().ContainInOrder("polyfills", "vendors", "module1");
         data.ModuleChunkKeys.Should().ContainSingle().Which.Should().Be("module1");
+    }
+
+    [Fact]
+    public async Task GetLoaderConfigDiff_QuandoRichiesto_AlloraRestituisce200ConDifferenzeAttese()
+    {
+        // Arrange
+
+        // Act
+        var response = await Client.GetAsync("/api/home/loader/config-diff");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var data = await ApiResponseTestHelper.LeggiDataSuccessoAsync<LoaderWebpackConfigDiffDto>(response);
+        data.RouteKey.Should().Be("loader-config-diff");
+        data.BaseConfigFile.Should().Be("Client/webpack.config.js");
+        data.ComparedConfigFile.Should().Be("Client/webpack-html-plugin.config.js");
+        data.BaseGeneratedView.Should().Be("Views/Home/Index.cshtml");
+        data.ComparedGeneratedView.Should().Be("Views/Home/Module1.cshtml");
+        data.OutputFilenamePatternMatches.Should().BeTrue();
+        data.SourceMapFilenamePatternMatches.Should().BeTrue();
+        data.HtmlTemplateMatches.Should().BeTrue();
+        data.HtmlPluginInjectMatches.Should().BeTrue();
+        data.MissingEntryChunkKeysInCompared.Should().ContainSingle().Which.Should().Be("module2");
+        data.MissingModuleChunkKeysInCompared.Should().ContainSingle().Which.Should().Be("module2");
+        data.SharedEntryChunkKeys.Should().Contain(["polyfills", "vendors", "module1"]);
     }
 }

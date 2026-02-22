@@ -15,4 +15,6 @@ public interface IHomeService
     LoaderChunkManifestDto GetLoaderChunkManifest();
 
     LoaderHtmlPluginConfigDto GetLoaderHtmlPluginConfig();
+
+    LoaderWebpackConfigDiffDto GetLoaderWebpackConfigDiff();
 }

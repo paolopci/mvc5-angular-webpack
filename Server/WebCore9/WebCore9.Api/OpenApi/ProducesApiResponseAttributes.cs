@@ -75,6 +75,15 @@ public sealed class ProducesApiLoaderHtmlPluginConfigResponseAttribute : Produce
     }
 }
 
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+public sealed class ProducesApiLoaderConfigDiffResponseAttribute : ProducesApiOkResponseAttribute
+{
+    public ProducesApiLoaderConfigDiffResponseAttribute()
+        : base(typeof(LoaderWebpackConfigDiffDto))
+    {
+    }
+}
+
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
 public class ProducesApiProblemResponseAttribute : ProducesResponseTypeAttribute
 {

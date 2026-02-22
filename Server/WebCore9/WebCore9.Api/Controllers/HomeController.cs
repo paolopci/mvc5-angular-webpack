@@ -34,10 +34,7 @@ public sealed class HomeController : ApiControllerBase
     }
 
     [HttpGet("modules/{key}")]
-    [ProducesApiModuleResponse]
-    [ProducesApiBadRequest]
-    [ProducesApiConflict]
-    [ProducesApiNotFound]
+    [ApiConventionMethod(typeof(HomeControllerOpenApiConventions), nameof(HomeControllerOpenApiConventions.GetModuleByKey))]
     public ActionResult<ApiResponse<ModuleInfoDto>> GetModule(string key)
     {
         if (string.IsNullOrWhiteSpace(key))
@@ -68,8 +65,7 @@ public sealed class HomeController : ApiControllerBase
     }
 
     [HttpGet("loader")]
-    [ProducesApiLoaderResponse]
-    [ProducesApiInternalError]
+    [ApiConventionMethod(typeof(HomeControllerOpenApiConventions), nameof(HomeControllerOpenApiConventions.GetLoader))]
     public ActionResult<ApiResponse<LoaderInfoDto>> GetLoader()
     {
         try
@@ -84,8 +80,7 @@ public sealed class HomeController : ApiControllerBase
     }
 
     [HttpGet("loader/chunks")]
-    [ProducesApiLoaderChunksResponse]
-    [ProducesApiInternalError]
+    [ApiConventionMethod(typeof(HomeControllerOpenApiConventions), nameof(HomeControllerOpenApiConventions.GetLoaderChunks))]
     public ActionResult<ApiResponse<LoaderChunkManifestDto>> GetLoaderChunks()
     {
         try
@@ -100,8 +95,7 @@ public sealed class HomeController : ApiControllerBase
     }
 
     [HttpGet("loader/html-plugin-config")]
-    [ProducesApiLoaderHtmlPluginConfigResponse]
-    [ProducesApiInternalError]
+    [ApiConventionMethod(typeof(HomeControllerOpenApiConventions), nameof(HomeControllerOpenApiConventions.GetLoaderHtmlPluginConfig))]
     public ActionResult<ApiResponse<LoaderHtmlPluginConfigDto>> GetLoaderHtmlPluginConfig()
     {
         try
@@ -112,6 +106,21 @@ public sealed class HomeController : ApiControllerBase
         catch (Exception)
         {
             return ApiProblem(ApiProblemDetailsFactory.InternalError("Unable to resolve loader html plugin config."));
+        }
+    }
+
+    [HttpGet("loader/config-diff")]
+    [ApiConventionMethod(typeof(HomeControllerOpenApiConventions), nameof(HomeControllerOpenApiConventions.GetLoaderConfigDiff))]
+    public ActionResult<ApiResponse<LoaderWebpackConfigDiffDto>> GetLoaderConfigDiff()
+    {
+        try
+        {
+            var configDiff = _homeService.GetLoaderWebpackConfigDiff();
+            return ApiOk(configDiff);
+        }
+        catch (Exception)
+        {
+            return ApiProblem(ApiProblemDetailsFactory.InternalError("Unable to resolve loader webpack config diff."));
         }
     }
 
