@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using WebCore9.Api.Common;
+using WebCore9.Api.OpenApi;
 using WebCore9.Core.Abstractions;
 using WebCore9.Core.Models;
 
@@ -17,7 +18,7 @@ public sealed class HomeController : ApiControllerBase
     }
 
     [HttpGet]
-    [ProducesResponseType(typeof(ApiResponse<HomeInfoDto>), StatusCodes.Status200OK)]
+    [ProducesApiOkResponse(typeof(HomeInfoDto))]
     public ActionResult<ApiResponse<HomeInfoDto>> Get()
     {
         var homeInfo = _homeService.GetHomeInfo();
@@ -25,7 +26,7 @@ public sealed class HomeController : ApiControllerBase
     }
 
     [HttpGet("modules")]
-    [ProducesResponseType(typeof(ApiResponse<IReadOnlyList<ModuleInfoDto>>), StatusCodes.Status200OK)]
+    [ProducesApiOkResponse(typeof(IReadOnlyList<ModuleInfoDto>))]
     public ActionResult<ApiResponse<IReadOnlyList<ModuleInfoDto>>> GetModules()
     {
         var modules = _homeService.GetModules();
@@ -33,10 +34,10 @@ public sealed class HomeController : ApiControllerBase
     }
 
     [HttpGet("modules/{key}")]
-    [ProducesResponseType(typeof(ApiResponse<ModuleInfoDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesApiOkResponse(typeof(ModuleInfoDto))]
+    [ProducesApiBadRequest]
+    [ProducesApiConflict]
+    [ProducesApiNotFound]
     public ActionResult<ApiResponse<ModuleInfoDto>> GetModule(string key)
     {
         if (string.IsNullOrWhiteSpace(key))
@@ -67,8 +68,8 @@ public sealed class HomeController : ApiControllerBase
     }
 
     [HttpGet("loader")]
-    [ProducesResponseType(typeof(ApiResponse<LoaderInfoDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [ProducesApiOkResponse(typeof(LoaderInfoDto))]
+    [ProducesApiInternalError]
     public ActionResult<ApiResponse<LoaderInfoDto>> GetLoader()
     {
         try
@@ -79,6 +80,22 @@ public sealed class HomeController : ApiControllerBase
         catch (Exception)
         {
             return ApiProblem(ApiProblemDetailsFactory.InternalError("Unable to resolve loader metadata."));
+        }
+    }
+
+    [HttpGet("loader/chunks")]
+    [ProducesApiOkResponse(typeof(LoaderChunkManifestDto))]
+    [ProducesApiInternalError]
+    public ActionResult<ApiResponse<LoaderChunkManifestDto>> GetLoaderChunks()
+    {
+        try
+        {
+            var chunkManifest = _homeService.GetLoaderChunkManifest();
+            return ApiOk(chunkManifest);
+        }
+        catch (Exception)
+        {
+            return ApiProblem(ApiProblemDetailsFactory.InternalError("Unable to resolve loader chunk manifest."));
         }
     }
 

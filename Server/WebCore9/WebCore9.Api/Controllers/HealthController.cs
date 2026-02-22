@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using WebCore9.Api.OpenApi;
 using WebCore9.Core.Abstractions;
 using WebCore9.Core.Models;
 
@@ -18,7 +19,7 @@ public sealed class HealthController : ApiControllerBase
     }
 
     [HttpGet]
-    [ProducesResponseType(typeof(ApiResponse<HealthStatusDto>), StatusCodes.Status200OK)]
+    [ProducesApiOkResponse(typeof(HealthStatusDto))]
     public ActionResult<ApiResponse<HealthStatusDto>> Get()
     {
         var status = _healthService.GetStatus(_environment.EnvironmentName);

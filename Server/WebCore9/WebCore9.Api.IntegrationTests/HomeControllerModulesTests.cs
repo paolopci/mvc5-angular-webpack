@@ -2,8 +2,8 @@ using System.Net;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Testing;
-using WebCore9.Core.Models;
 using WebCore9.Api.IntegrationTests.TestSupport;
+using WebCore9.Core.Models;
 
 namespace WebCore9.Api.IntegrationTests;
 
@@ -15,40 +15,24 @@ public sealed class HomeControllerModulesTests : ApiIntegrationTestBase
     }
 
     [Fact]
-    public async Task GetLoader_Restituisce200ConApiResponseELoaderInfo()
+    public async Task GetModules_QuandoRichiesto_AlloraRestituisce200ConListaModuliArricchita()
     {
         // Arrange
 
         // Act
-        var response = await Client.GetAsync("/api/home/loader");
+        var response = await Client.GetAsync("/api/home/modules");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var data = await ApiResponseTestHelper.LeggiDataSuccessoAsync<LoaderInfoDto>(response);
-        data.RouteKey.Should().Be("loader");
-        data.RootElementTag.Should().Be("my-angular-app");
-        data.UsesWebpackChunkEntries.Should().BeTrue();
+        var data = await ApiResponseTestHelper.LeggiDataSuccessoAsync<IReadOnlyList<ModuleInfoDto>>(response);
+        data.Should().HaveCount(2);
+        data.Should().ContainSingle(m => m.RouteKey == "module1" && m.LegacyView == "Views/Home/Module1.cshtml");
+        data.Should().ContainSingle(m => m.RouteKey == "module2" && m.ClientBundleName == "module2");
     }
 
     [Fact]
-    public async Task GetHealth_Restituisce200ConApiResponseEHealthStatus()
-    {
-        // Arrange
-
-        // Act
-        var response = await Client.GetAsync("/api/health");
-
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-
-        var data = await ApiResponseTestHelper.LeggiDataSuccessoAsync<HealthStatusDto>(response);
-        data.Status.Should().Be("Healthy");
-        data.Service.Should().Be("WebCore9.Api");
-    }
-
-    [Fact]
-    public async Task GetModule_ConChiaveValida_Restituisce200EPayloadAtteso()
+    public async Task GetModule_QuandoChiaveValida_AlloraRestituisce200EPayloadAtteso()
     {
         // Arrange
 
@@ -68,7 +52,7 @@ public sealed class HomeControllerModulesTests : ApiIntegrationTestBase
     }
 
     [Fact]
-    public async Task GetModule_ConChiaveNonValida_Restituisce404ConProblemDetails()
+    public async Task GetModule_QuandoChiaveNonValida_AlloraRestituisce404ConProblemDetails()
     {
         // Arrange
 
@@ -85,7 +69,7 @@ public sealed class HomeControllerModulesTests : ApiIntegrationTestBase
     }
 
     [Fact]
-    public async Task GetModule_ConChiaveConCaratteriNonConsentiti_Restituisce400ConProblemDetailsDiValidazione()
+    public async Task GetModule_QuandoChiaveConCaratteriNonConsentiti_AlloraRestituisce400ConProblemDetailsDiValidazione()
     {
         // Arrange
 
@@ -102,7 +86,7 @@ public sealed class HomeControllerModulesTests : ApiIntegrationTestBase
     }
 
     [Fact]
-    public async Task GetModule_ConChiaveRiservataLoader_Restituisce409ConProblemDetailsDiConflitto()
+    public async Task GetModule_QuandoChiaveRiservataLoader_AlloraRestituisce409ConProblemDetailsDiConflitto()
     {
         // Arrange
 

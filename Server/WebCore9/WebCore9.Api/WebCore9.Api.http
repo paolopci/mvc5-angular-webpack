@@ -17,6 +17,11 @@ Accept: application/json
 
 ###
 
+GET {{WebCore9.Api_HostAddress}}/api/home/loader/chunks
+Accept: application/json
+
+###
+
 GET {{WebCore9.Api_HostAddress}}/api/home/modules/module1
 Accept: application/json
 

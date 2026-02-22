@@ -11,4 +11,6 @@ public interface IHomeService
     ModuleInfoDto? GetModuleInfo(string key);
 
     LoaderInfoDto GetLoaderInfo();
+
+    LoaderChunkManifestDto GetLoaderChunkManifest();
 }

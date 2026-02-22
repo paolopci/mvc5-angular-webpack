@@ -11,6 +11,9 @@ public sealed class HomeService : IHomeService
         "~/Scripts/ng2/vendors.js"
     ];
 
+    private static readonly string[] SharedChunkKeys = ["polyfills", "vendors"];
+    private static readonly string[] ModuleChunkKeys = ["module1", "module2"];
+
     public HomeInfoDto GetHomeInfo()
     {
         return new HomeInfoDto
@@ -56,6 +59,23 @@ public sealed class HomeService : IHomeService
             UsesWebpackChunkEntries = true,
             ChunkEntryExpression = "htmlWebpackPlugin.files.chunks[chunk].entry",
             LegacyView = "Views/Home/loader.cshtml"
+        };
+    }
+
+    public LoaderChunkManifestDto GetLoaderChunkManifest()
+    {
+        return new LoaderChunkManifestDto
+        {
+            RouteKey = "loader-chunks",
+            LegacyView = "Views/Home/loader.cshtml",
+            ManifestSource = "htmlWebpackPlugin.files.chunks",
+            ChunkEntryExpression = "htmlWebpackPlugin.files.chunks[chunk].entry",
+            OutputFilenamePattern = "[name].[hash].js",
+            SourceMapFilenamePattern = "[name].[hash].js.map",
+            SharedChunkKeys = [.. SharedChunkKeys],
+            ModuleChunkKeys = [.. ModuleChunkKeys],
+            AllKnownChunkKeys = [.. SharedChunkKeys, .. ModuleChunkKeys],
+            DefaultModuleChunkKey = "module1"
         };
     }
 
