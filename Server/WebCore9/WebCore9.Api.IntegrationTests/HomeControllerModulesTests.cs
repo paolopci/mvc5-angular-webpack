@@ -1,79 +1,120 @@
 using System.Net;
-using System.Net.Http.Json;
+using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Testing;
 using WebCore9.Core.Models;
+using WebCore9.Api.IntegrationTests.TestSupport;
 
 namespace WebCore9.Api.IntegrationTests;
 
-public sealed class HomeControllerModulesTests : IClassFixture<WebApplicationFactory<global::Program>>
+public sealed class HomeControllerModulesTests : ApiIntegrationTestBase
 {
-    private readonly HttpClient _client;
-
     public HomeControllerModulesTests(WebApplicationFactory<global::Program> factory)
+        : base(factory)
     {
-        _client = factory.CreateClient();
     }
 
     [Fact]
     public async Task GetLoader_Restituisce200ConApiResponseELoaderInfo()
     {
-        var response = await _client.GetAsync("/api/home/loader");
+        // Arrange
 
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        // Act
+        var response = await Client.GetAsync("/api/home/loader");
 
-        var payload = await response.Content.ReadFromJsonAsync<ApiResponse<LoaderInfoDto>>();
-        Assert.NotNull(payload);
-        Assert.True(payload!.Success);
-        Assert.NotNull(payload.Data);
-        Assert.Equal("loader", payload.Data!.RouteKey);
-        Assert.Equal("my-angular-app", payload.Data.RootElementTag);
-        Assert.True(payload.Data.UsesWebpackChunkEntries);
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var data = await ApiResponseTestHelper.LeggiDataSuccessoAsync<LoaderInfoDto>(response);
+        data.RouteKey.Should().Be("loader");
+        data.RootElementTag.Should().Be("my-angular-app");
+        data.UsesWebpackChunkEntries.Should().BeTrue();
     }
 
     [Fact]
     public async Task GetHealth_Restituisce200ConApiResponseEHealthStatus()
     {
-        var response = await _client.GetAsync("/api/health");
+        // Arrange
 
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        // Act
+        var response = await Client.GetAsync("/api/health");
 
-        var payload = await response.Content.ReadFromJsonAsync<ApiResponse<HealthStatusDto>>();
-        Assert.NotNull(payload);
-        Assert.True(payload!.Success);
-        Assert.NotNull(payload.Data);
-        Assert.Equal("Healthy", payload.Data!.Status);
-        Assert.Equal("WebCore9.Api", payload.Data.Service);
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var data = await ApiResponseTestHelper.LeggiDataSuccessoAsync<HealthStatusDto>(response);
+        data.Status.Should().Be("Healthy");
+        data.Service.Should().Be("WebCore9.Api");
     }
 
     [Fact]
     public async Task GetModule_ConChiaveValida_Restituisce200EPayloadAtteso()
     {
-        var response = await _client.GetAsync("/api/home/modules/module1");
+        // Arrange
 
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        // Act
+        var response = await Client.GetAsync("/api/home/modules/module1");
 
-        var payload = await response.Content.ReadFromJsonAsync<ApiResponse<ModuleInfoDto>>();
-        Assert.NotNull(payload);
-        Assert.True(payload!.Success);
-        Assert.NotNull(payload.Data);
-        Assert.Equal("module1", payload.Data!.RouteKey);
-        Assert.Equal("Module 1", payload.Data.Title);
-        Assert.Equal("my-angular-app", payload.Data.RootElementTag);
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var data = await ApiResponseTestHelper.LeggiDataSuccessoAsync<ModuleInfoDto>(response);
+        data.RouteKey.Should().Be("module1");
+        data.Title.Should().Be("Module 1");
+        data.RootElementTag.Should().Be("my-angular-app");
+        data.LegacyView.Should().Be("Views/Home/Module1.cshtml");
+        data.ClientBundleName.Should().Be("module1");
+        data.UsesPrebuiltNg2Bundles.Should().BeTrue();
     }
 
     [Fact]
     public async Task GetModule_ConChiaveNonValida_Restituisce404ConProblemDetails()
     {
-        var response = await _client.GetAsync("/api/home/modules/invalid");
+        // Arrange
 
-        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        // Act
+        var response = await Client.GetAsync("/api/home/modules/invalid");
 
-        var payload = await response.Content.ReadFromJsonAsync<ProblemDetails>();
-        Assert.NotNull(payload);
-        Assert.Equal((int)HttpStatusCode.NotFound, payload!.Status);
-        Assert.Equal("Module key not found", payload.Title);
-        Assert.Contains("invalid", payload.Detail);
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+
+        var payload = await ApiResponseTestHelper.LeggiProblemDetailsAsync(response);
+        payload.Status.Should().Be((int)HttpStatusCode.NotFound);
+        payload.Title.Should().Be("Module key not found");
+        payload.Detail.Should().Contain("invalid");
     }
 
+    [Fact]
+    public async Task GetModule_ConChiaveConCaratteriNonConsentiti_Restituisce400ConProblemDetailsDiValidazione()
+    {
+        // Arrange
+
+        // Act
+        var response = await Client.GetAsync("/api/home/modules/module.1");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+
+        var payload = await ApiResponseTestHelper.LeggiProblemDetailsAsync(response);
+        payload.Status.Should().Be((int)HttpStatusCode.BadRequest);
+        payload.Title.Should().Be("Validation failed");
+        payload.Detail.Should().Contain("must not contain");
+    }
+
+    [Fact]
+    public async Task GetModule_ConChiaveRiservataLoader_Restituisce409ConProblemDetailsDiConflitto()
+    {
+        // Arrange
+
+        // Act
+        var response = await Client.GetAsync("/api/home/modules/loader");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+
+        var payload = await ApiResponseTestHelper.LeggiProblemDetailsAsync(response);
+        payload.Status.Should().Be((int)HttpStatusCode.Conflict);
+        payload.Title.Should().Be("Reserved module key");
+        payload.Detail.Should().Contain("/api/home/loader");
+    }
 }

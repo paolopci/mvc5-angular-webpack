@@ -27,7 +27,22 @@ Accept: application/json
 
 ###
 
+GET {{WebCore9.Api_HostAddress}}/api/home/modules
+Accept: application/json
+
+###
+
 GET {{WebCore9.Api_HostAddress}}/api/home/modules/invalid
+Accept: application/json
+
+###
+
+GET {{WebCore9.Api_HostAddress}}/api/home/modules/module.1
+Accept: application/json
+
+###
+
+GET {{WebCore9.Api_HostAddress}}/api/home/modules/loader
 Accept: application/json
 
 ###
