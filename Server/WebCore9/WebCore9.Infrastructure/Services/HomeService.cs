@@ -49,4 +49,18 @@ public sealed class HomeService : IHomeService
             _ => null
         };
     }
+
+    public LoaderInfoDto GetLoaderInfo()
+    {
+        return new LoaderInfoDto
+        {
+            RouteKey = "loader",
+            Title = "Module 1",
+            RootElementTag = "my-angular-app",
+            LoadingText = "Loading....",
+            UsesWebpackChunkEntries = true,
+            ChunkEntryExpression = "htmlWebpackPlugin.files.chunks[chunk].entry",
+            LegacyView = "Views/Home/loader.cshtml"
+        };
+    }
 }

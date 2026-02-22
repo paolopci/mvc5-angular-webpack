@@ -7,4 +7,6 @@ public interface IHomeService
     HomeInfoDto GetHomeInfo();
 
     ModuleInfoDto? GetModuleInfo(string key);
+
+    LoaderInfoDto GetLoaderInfo();
 }

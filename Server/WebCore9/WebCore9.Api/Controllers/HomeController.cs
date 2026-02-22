@@ -23,31 +23,32 @@ public sealed class HomeController : ControllerBase
     }
 
     [HttpGet("modules/{key}")]
+    [ProducesResponseType(typeof(ModuleInfoDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public ActionResult<ModuleInfoDto> GetModule(string key)
     {
         var moduleInfo = _homeService.GetModuleInfo(key);
         if (moduleInfo is null)
         {
-            return NotFound(new
+            var problem = new ProblemDetails
             {
-                message = "Module key not found.",
-                key
-            });
+                Title = "Module key not found",
+                Detail = $"Module key '{key}' is not supported.",
+                Status = StatusCodes.Status404NotFound
+            };
+
+            return NotFound(problem);
         }
 
         return Ok(moduleInfo);
     }
 
-    // Compatibilita temporanea con i client che usano gli endpoint non parametrizzati.
-    [HttpGet("module1")]
-    public ActionResult<ModuleInfoDto> GetModule1()
+    [HttpGet("loader")]
+    [ProducesResponseType(typeof(LoaderInfoDto), StatusCodes.Status200OK)]
+    public ActionResult<LoaderInfoDto> GetLoader()
     {
-        return GetModule("module1");
+        var loaderInfo = _homeService.GetLoaderInfo();
+        return Ok(loaderInfo);
     }
 
-    [HttpGet("module2")]
-    public ActionResult<ModuleInfoDto> GetModule2()
-    {
-        return GetModule("module2");
-    }
 }
