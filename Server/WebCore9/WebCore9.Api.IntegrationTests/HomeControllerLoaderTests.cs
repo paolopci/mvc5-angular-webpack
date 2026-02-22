@@ -1,7 +1,12 @@
 using System.Net;
 using FluentAssertions;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using NSubstitute;
 using WebCore9.Api.IntegrationTests.TestSupport;
+using WebCore9.Core.Abstractions;
 using WebCore9.Core.Models;
 
 namespace WebCore9.Api.IntegrationTests;
@@ -120,5 +125,105 @@ public sealed class HomeControllerLoaderTests : ApiIntegrationTestBase
         data.MissingEntryChunkKeysInCompared.Should().ContainSingle().Which.Should().Be("module2");
         data.MissingModuleChunkKeysInCompared.Should().ContainSingle().Which.Should().Be("module2");
         data.SharedEntryChunkKeys.Should().Contain(["polyfills", "vendors", "module1"]);
+    }
+
+    [Fact]
+    public async Task GetLoader_QuandoHomeServiceGeneraEccezione_AlloraRestituisce500ConProblemDetails()
+    {
+        // Arrange
+        using var factory = new HomeServiceOverrideFactory(homeService =>
+        {
+            homeService.GetLoaderInfo().Returns(_ => throw new InvalidOperationException("boom-loader"));
+        });
+        using var client = CreateClient(factory);
+
+        // Act
+        var response = await client.GetAsync("/api/home/loader");
+
+        // Assert
+        await AssertInternalServerErrorAsync(response, "Unable to resolve loader metadata.");
+    }
+
+    [Fact]
+    public async Task GetLoaderChunks_QuandoHomeServiceGeneraEccezione_AlloraRestituisce500ConProblemDetails()
+    {
+        // Arrange
+        using var factory = new HomeServiceOverrideFactory(homeService =>
+        {
+            homeService.GetLoaderChunkManifest().Returns(_ => throw new InvalidOperationException("boom-chunks"));
+        });
+        using var client = CreateClient(factory);
+
+        // Act
+        var response = await client.GetAsync("/api/home/loader/chunks");
+
+        // Assert
+        await AssertInternalServerErrorAsync(response, "Unable to resolve loader chunk manifest.");
+    }
+
+    [Fact]
+    public async Task GetLoaderHtmlPluginConfig_QuandoHomeServiceGeneraEccezione_AlloraRestituisce500ConProblemDetails()
+    {
+        // Arrange
+        using var factory = new HomeServiceOverrideFactory(homeService =>
+        {
+            homeService.GetLoaderHtmlPluginConfig().Returns(_ => throw new InvalidOperationException("boom-html"));
+        });
+        using var client = CreateClient(factory);
+
+        // Act
+        var response = await client.GetAsync("/api/home/loader/html-plugin-config");
+
+        // Assert
+        await AssertInternalServerErrorAsync(response, "Unable to resolve loader html plugin config.");
+    }
+
+    [Fact]
+    public async Task GetLoaderConfigDiff_QuandoHomeServiceGeneraEccezione_AlloraRestituisce500ConProblemDetails()
+    {
+        // Arrange
+        using var factory = new HomeServiceOverrideFactory(homeService =>
+        {
+            homeService.GetLoaderWebpackConfigDiff().Returns(_ => throw new InvalidOperationException("boom-diff"));
+        });
+        using var client = CreateClient(factory);
+
+        // Act
+        var response = await client.GetAsync("/api/home/loader/config-diff");
+
+        // Assert
+        await AssertInternalServerErrorAsync(response, "Unable to resolve loader webpack config diff.");
+    }
+
+    private static async Task AssertInternalServerErrorAsync(HttpResponseMessage response, string expectedDetail)
+    {
+        response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
+
+        var payload = await ApiResponseTestHelper.LeggiProblemDetailsAsync(response);
+        payload.Status.Should().Be((int)HttpStatusCode.InternalServerError);
+        payload.Title.Should().Be("Internal server error");
+        payload.Detail.Should().Be(expectedDetail);
+    }
+
+    private sealed class HomeServiceOverrideFactory : WebApplicationFactory<global::Program>
+    {
+        private readonly Action<IHomeService> _configureSubstitute;
+
+        public HomeServiceOverrideFactory(Action<IHomeService> configureSubstitute)
+        {
+            _configureSubstitute = configureSubstitute;
+        }
+
+        protected override void ConfigureWebHost(IWebHostBuilder builder)
+        {
+            builder.ConfigureServices(services =>
+            {
+                var homeService = Substitute.For<IHomeService>();
+                _configureSubstitute(homeService);
+
+                services.RemoveAll<IHomeService>();
+                services.AddScoped(_ => homeService);
+            });
+        }
     }
 }

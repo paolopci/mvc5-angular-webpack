@@ -86,6 +86,25 @@ public sealed class HomeControllerModulesTests : ApiIntegrationTestBase
     }
 
     [Fact]
+    public async Task GetModule_QuandoChiaveSoloWhitespace_AlloraRestituisce400ConProblemDetailsDiValidazione()
+    {
+        // Arrange
+
+        // Act
+        var response = await Client.GetAsync("/api/home/modules/%20");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+
+        var payload = await ApiResponseTestHelper.LeggiProblemDetailsAsync(response);
+        payload.Status.Should().Be((int)HttpStatusCode.BadRequest);
+        payload.Title.Should().NotBeNullOrWhiteSpace();
+        payload.Title.Should().Match(s =>
+            s == "Validation failed" ||
+            s == "One or more validation errors occurred.");
+    }
+
+    [Fact]
     public async Task GetModule_QuandoChiaveRiservataLoader_AlloraRestituisce409ConProblemDetailsDiConflitto()
     {
         // Arrange
