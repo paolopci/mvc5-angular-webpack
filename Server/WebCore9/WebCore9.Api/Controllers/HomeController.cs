@@ -68,60 +68,49 @@ public sealed class HomeController : ApiControllerBase
     [ApiConventionMethod(typeof(HomeControllerOpenApiConventions), nameof(HomeControllerOpenApiConventions.GetLoader))]
     public ActionResult<ApiResponse<LoaderInfoDto>> GetLoader()
     {
-        try
-        {
-            var loaderInfo = _homeService.GetLoaderInfo();
-            return ApiOk(loaderInfo);
-        }
-        catch (Exception)
-        {
-            return ApiProblem(ApiProblemDetailsFactory.InternalError("Unable to resolve loader metadata."));
-        }
+        return ExecuteLoaderMetadataRequest(
+            _homeService.GetLoaderInfo,
+            "Unable to resolve loader metadata.");
     }
 
     [HttpGet("loader/chunks")]
     [ApiConventionMethod(typeof(HomeControllerOpenApiConventions), nameof(HomeControllerOpenApiConventions.GetLoaderChunks))]
     public ActionResult<ApiResponse<LoaderChunkManifestDto>> GetLoaderChunks()
     {
-        try
-        {
-            var chunkManifest = _homeService.GetLoaderChunkManifest();
-            return ApiOk(chunkManifest);
-        }
-        catch (Exception)
-        {
-            return ApiProblem(ApiProblemDetailsFactory.InternalError("Unable to resolve loader chunk manifest."));
-        }
+        return ExecuteLoaderMetadataRequest(
+            _homeService.GetLoaderChunkManifest,
+            "Unable to resolve loader chunk manifest.");
     }
 
     [HttpGet("loader/html-plugin-config")]
     [ApiConventionMethod(typeof(HomeControllerOpenApiConventions), nameof(HomeControllerOpenApiConventions.GetLoaderHtmlPluginConfig))]
     public ActionResult<ApiResponse<LoaderHtmlPluginConfigDto>> GetLoaderHtmlPluginConfig()
     {
-        try
-        {
-            var htmlPluginConfig = _homeService.GetLoaderHtmlPluginConfig();
-            return ApiOk(htmlPluginConfig);
-        }
-        catch (Exception)
-        {
-            return ApiProblem(ApiProblemDetailsFactory.InternalError("Unable to resolve loader html plugin config."));
-        }
+        return ExecuteLoaderMetadataRequest(
+            _homeService.GetLoaderHtmlPluginConfig,
+            "Unable to resolve loader html plugin config.");
     }
 
     [HttpGet("loader/config-diff")]
     [ApiConventionMethod(typeof(HomeControllerOpenApiConventions), nameof(HomeControllerOpenApiConventions.GetLoaderConfigDiff))]
     public ActionResult<ApiResponse<LoaderWebpackConfigDiffDto>> GetLoaderConfigDiff()
     {
+        return ExecuteLoaderMetadataRequest(
+            _homeService.GetLoaderWebpackConfigDiff,
+            "Unable to resolve loader webpack config diff.");
+    }
+
+    private ActionResult<ApiResponse<T>> ExecuteLoaderMetadataRequest<T>(
+        Func<T> action,
+        string errorDetail)
+    {
         try
         {
-            var configDiff = _homeService.GetLoaderWebpackConfigDiff();
-            return ApiOk(configDiff);
+            return ApiOk(action());
         }
         catch (Exception)
         {
-            return ApiProblem(ApiProblemDetailsFactory.InternalError("Unable to resolve loader webpack config diff."));
+            return ApiProblem(ApiProblemDetailsFactory.InternalError(errorDetail));
         }
     }
-
 }
