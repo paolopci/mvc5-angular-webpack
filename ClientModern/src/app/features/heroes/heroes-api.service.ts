@@ -21,6 +21,10 @@ export class HeroesApiService {
       .pipe(map((response) => unwrap(response).map(mapHeroListItem)));
   }
 
+  getTopHeroes(limit = 4): Observable<HeroListItemViewModel[]> {
+    return this.getHeroes().pipe(map((heroes) => heroes.slice(1, 1 + limit)));
+  }
+
   getHeroById(id: number): Observable<HeroDetailViewModel> {
     return this.http
       .get<ApiResponse<HeroDto>>(`${this.env.apiBaseUrl}/api/heroes/${id}`)

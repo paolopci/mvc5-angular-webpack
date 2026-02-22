@@ -7,7 +7,9 @@
   <nav class="app-shell__nav" aria-label="Primary">
     <a routerLink="/health" routerLinkActive="is-active">Health</a>
     <a routerLink="/modules" routerLinkActive="is-active">Home Modules</a>
-    <a routerLink="/heroes" routerLinkActive="is-active">Heroes</a>
+    <a routerLink="/heroes/dashboard" routerLinkActive="is-active">Heroes Dashboard</a>
+    <a routerLink="/heroes/search" routerLinkActive="is-active">Hero Search</a>
+    <a routerLink="/heroes" [routerLinkActiveOptions]="{ exact: true }" routerLinkActive="is-active">Heroes</a>
   </nav>
 </header>
 

@@ -16,9 +16,17 @@ builder.Services.AddCors(options =>
     });
 });
 
+var defaultHeroesStoragePath = Path.Combine(builder.Environment.ContentRootPath, "App_Data", "heroes-store.json");
+var configuredHeroesStoragePath = builder.Configuration["Heroes:StorageFilePath"];
+var resolvedHeroesStoragePath = string.IsNullOrWhiteSpace(configuredHeroesStoragePath)
+    ? defaultHeroesStoragePath
+    : (Path.IsPathRooted(configuredHeroesStoragePath)
+        ? configuredHeroesStoragePath
+        : Path.Combine(builder.Environment.ContentRootPath, configuredHeroesStoragePath));
+
 builder.Services.AddApiServices();
 builder.Services.AddCoreServices();
-builder.Services.AddInfrastructureServices();
+builder.Services.AddInfrastructureServices(resolvedHeroesStoragePath);
 
 var app = builder.Build();
 

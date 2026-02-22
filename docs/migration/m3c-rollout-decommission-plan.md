@@ -38,7 +38,7 @@ Una feature puo' essere considerata **parity sufficiente per switch primario** q
 | --- | --- | --- | --- |
 | `Health/Status` (`/health`) | Migrata | `Si` (tecnica) | Feature diagnostica, non business |
 | `Home Modules Catalog` (`/modules`) | Migrata | `Si` (informativa) | Slice metadata, basso rischio |
-| `Heroes` read/search/detail/CRUD (`/heroes`) | Migrata parziale avanzata | `Parziale` | CRUD e feedback base presenti; mancano persistence reale e parity UX completa |
+| `Heroes` read/search/detail/CRUD (`/heroes*`) | Migrata parziale avanzata | `Parziale avanzata` | CRUD + dashboard/search/detail route, feedback e delete confirm presenti; storage reale JSON attivo, mancano DB/persistence evoluta e parity UX completa |
 | `Module1` UI finale | Non migrata | `No` | Richiede slice funzionale dedicata |
 | `Module2` full parity | In corso | `No` | `/heroes` copre solo una parte del modulo |
 
@@ -257,10 +257,16 @@ Smoke minimi:
 
 - `GET /api/health`
 - `GET /api/home`
+- verificare file store `Heroes` (`Server/WebCore9/WebCore9.Api/App_Data/heroes-store.json`) dopo mutation smoke
 - `http://localhost:4200/health`
 - `http://localhost:4200/modules`
 - `http://localhost:4200/heroes`
+- `http://localhost:4200/heroes/dashboard`
+- `http://localhost:4200/heroes/search`
+- `http://localhost:4200/heroes/20` (esempio detail route)
 - CRUD smoke `heroes`: create -> update -> delete + fallback legacy `Module2` se necessario
+- parity UX smoke `heroes`: filter/empty state, messages log, delete confirm a doppio step
+- routing parity smoke `heroes`: dashboard -> search -> detail -> save/back
 
 ### Avvio locale - legacy (quando necessario)
 
@@ -309,5 +315,5 @@ Checklist supporto per rilascio slice:
 ## 7) Prossimi Passi dopo M3.C
 
 1. Completare telemetry export (OpenTelemetry / sink) per usare i contatori `Heroes` in ambienti non-locali
-2. Eseguire `M3.A` su slice successive oppure completare parity UX `Module2`
-3. Estrarre `runbook` e `architettura` in documenti dedicati quando si entra in staging/production
+2. Evolvere storage `Heroes` da file JSON a DB (se richiesto da concurrency/hosting multi-instance)
+3. Eseguire `M3.A` su slice successive oppure completare parity UX `Module2`

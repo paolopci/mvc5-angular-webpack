@@ -7,39 +7,21 @@ public sealed class HeroService : IHeroService
 {
     private static readonly object SyncRoot = new();
 
-    private static readonly HeroDto[] SeedHeroes =
-    [
-        new() { Id = 11, Name = "Mr. Nice" },
-        new() { Id = 12, Name = "Narco" },
-        new() { Id = 13, Name = "Bombasto" },
-        new() { Id = 14, Name = "Celeritas" },
-        new() { Id = 15, Name = "Magneta" },
-        new() { Id = 16, Name = "RubberMan" },
-        new() { Id = 17, Name = "Dynama" },
-        new() { Id = 18, Name = "Dr IQ" },
-        new() { Id = 19, Name = "Magma" },
-        new() { Id = 20, Name = "Tornado" }
-    ];
+    private readonly IHeroRepository _heroRepository;
 
-    private static List<HeroDto> _heroes = SeedHeroes.Select(Clone).ToList();
+    public HeroService(IHeroRepository heroRepository)
+    {
+        _heroRepository = heroRepository;
+    }
 
     public IReadOnlyList<HeroDto> GetHeroes()
     {
-        lock (SyncRoot)
-        {
-            return _heroes.Select(Clone).ToArray();
-        }
+        return _heroRepository.LoadHeroes();
     }
 
     public IReadOnlyList<HeroDto> SearchHeroes(string? name, int? id)
     {
-        HeroDto[] snapshot;
-        lock (SyncRoot)
-        {
-            snapshot = _heroes.Select(Clone).ToArray();
-        }
-
-        IEnumerable<HeroDto> query = snapshot;
+        IEnumerable<HeroDto> query = _heroRepository.LoadHeroes();
 
         if (id.HasValue)
         {
@@ -56,11 +38,8 @@ public sealed class HeroService : IHeroService
 
     public HeroDto? GetHeroById(int id)
     {
-        lock (SyncRoot)
-        {
-            var hero = _heroes.FirstOrDefault(h => h.Id == id);
-            return hero is null ? null : Clone(hero);
-        }
+        var hero = _heroRepository.LoadHeroes().FirstOrDefault(h => h.Id == id);
+        return hero is null ? null : Clone(hero);
     }
 
     public HeroMutationResult CreateHero(string? name)
@@ -73,15 +52,18 @@ public sealed class HeroService : IHeroService
 
         lock (SyncRoot)
         {
-            if (_heroes.Any(h => string.Equals(h.Name, normalizedName, StringComparison.OrdinalIgnoreCase)))
+            var heroes = _heroRepository.LoadHeroes().Select(Clone).ToList();
+
+            if (heroes.Any(h => string.Equals(h.Name, normalizedName, StringComparison.OrdinalIgnoreCase)))
             {
                 return HeroMutationResult.Fail(HeroMutationErrorCode.Conflict, $"Hero name '{normalizedName}' already exists.");
             }
 
-            var nextId = _heroes.Count == 0 ? 11 : _heroes.Max(h => h.Id) + 1;
+            var nextId = heroes.Count == 0 ? 11 : heroes.Max(h => h.Id) + 1;
             var created = new HeroDto { Id = nextId, Name = normalizedName };
-            _heroes.Add(created);
+            heroes.Add(created);
 
+            _heroRepository.SaveHeroes(heroes);
             return HeroMutationResult.Ok(Clone(created));
         }
     }
@@ -96,13 +78,15 @@ public sealed class HeroService : IHeroService
 
         lock (SyncRoot)
         {
-            var existing = _heroes.FirstOrDefault(h => h.Id == id);
+            var heroes = _heroRepository.LoadHeroes().Select(Clone).ToList();
+            var existing = heroes.FirstOrDefault(h => h.Id == id);
+
             if (existing is null)
             {
                 return HeroMutationResult.Fail(HeroMutationErrorCode.NotFound, $"Hero id '{id}' is not supported.");
             }
 
-            if (_heroes.Any(h =>
+            if (heroes.Any(h =>
                     h.Id != id &&
                     string.Equals(h.Name, normalizedName, StringComparison.OrdinalIgnoreCase)))
             {
@@ -110,6 +94,8 @@ public sealed class HeroService : IHeroService
             }
 
             existing.Name = normalizedName;
+            _heroRepository.SaveHeroes(heroes);
+
             return HeroMutationResult.Ok(Clone(existing));
         }
     }
@@ -118,13 +104,17 @@ public sealed class HeroService : IHeroService
     {
         lock (SyncRoot)
         {
-            var existing = _heroes.FirstOrDefault(h => h.Id == id);
+            var heroes = _heroRepository.LoadHeroes().Select(Clone).ToList();
+            var existing = heroes.FirstOrDefault(h => h.Id == id);
+
             if (existing is null)
             {
                 return HeroMutationResult.Fail(HeroMutationErrorCode.NotFound, $"Hero id '{id}' is not supported.");
             }
 
-            _heroes.Remove(existing);
+            heroes.Remove(existing);
+            _heroRepository.SaveHeroes(heroes);
+
             return HeroMutationResult.Ok(Clone(existing));
         }
     }

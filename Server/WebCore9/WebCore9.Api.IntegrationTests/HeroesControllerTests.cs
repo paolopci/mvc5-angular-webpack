@@ -102,20 +102,32 @@ public sealed class HeroesControllerTests : ApiIntegrationTestBase
     {
         // Arrange
         var payload = new { name = $"Nuovo Hero {Guid.NewGuid():N}" };
+        int? createdId = null;
 
-        // Act
-        var response = await Client.PostAsJsonAsync("/api/heroes", payload);
+        try
+        {
+            // Act
+            var response = await Client.PostAsJsonAsync("/api/heroes", payload);
 
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
-        response.Headers.Location.Should().NotBeNull();
+            // Assert
+            response.StatusCode.Should().Be(HttpStatusCode.Created);
+            response.Headers.Location.Should().NotBeNull();
 
-        var created = await ApiResponseTestHelper.LeggiDataSuccessoAsync<HeroDto>(response);
-        created.Id.Should().BeGreaterThan(20);
-        created.Name.Should().Be(payload.name);
+            var created = await ApiResponseTestHelper.LeggiDataSuccessoAsync<HeroDto>(response);
+            createdId = created.Id;
+            created.Id.Should().BeGreaterThan(20);
+            created.Name.Should().Be(payload.name);
 
-        var fetchResponse = await Client.GetAsync($"/api/heroes/{created.Id}");
-        fetchResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+            var fetchResponse = await Client.GetAsync($"/api/heroes/{created.Id}");
+            fetchResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        }
+        finally
+        {
+            if (createdId.HasValue)
+            {
+                await Client.DeleteAsync($"/api/heroes/{createdId.Value}");
+            }
+        }
     }
 
     [Fact]
@@ -155,21 +167,30 @@ public sealed class HeroesControllerTests : ApiIntegrationTestBase
     {
         // Arrange
         var id = 12;
+        var originalResponse = await Client.GetAsync($"/api/heroes/{id}");
+        var originalHero = await ApiResponseTestHelper.LeggiDataSuccessoAsync<HeroDto>(originalResponse);
         var updatedName = $"Narco Updated {Guid.NewGuid():N}"[..20];
         var payload = new { id, name = updatedName };
 
-        // Act
-        var response = await Client.PutAsJsonAsync($"/api/heroes/{id}", payload);
+        try
+        {
+            // Act
+            var response = await Client.PutAsJsonAsync($"/api/heroes/{id}", payload);
 
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var updated = await ApiResponseTestHelper.LeggiDataSuccessoAsync<HeroDto>(response);
-        updated.Id.Should().Be(id);
-        updated.Name.Should().Be(updatedName);
+            // Assert
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            var updated = await ApiResponseTestHelper.LeggiDataSuccessoAsync<HeroDto>(response);
+            updated.Id.Should().Be(id);
+            updated.Name.Should().Be(updatedName);
 
-        var fetchResponse = await Client.GetAsync($"/api/heroes/{id}");
-        var fetched = await ApiResponseTestHelper.LeggiDataSuccessoAsync<HeroDto>(fetchResponse);
-        fetched.Name.Should().Be(updatedName);
+            var fetchResponse = await Client.GetAsync($"/api/heroes/{id}");
+            var fetched = await ApiResponseTestHelper.LeggiDataSuccessoAsync<HeroDto>(fetchResponse);
+            fetched.Name.Should().Be(updatedName);
+        }
+        finally
+        {
+            await Client.PutAsJsonAsync($"/api/heroes/{id}", new { id, name = originalHero.Name });
+        }
     }
 
     [Fact]

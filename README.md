@@ -85,6 +85,12 @@ Run backend integration tests:
 dotnet test Server/WebCore9/WebCore9.Api.IntegrationTests/WebCore9.Api.IntegrationTests.csproj
 ```
 
+`Heroes` storage (current implementation):
+
+- real file-based JSON storage at `Server/WebCore9/WebCore9.Api/App_Data/heroes-store.json`
+- auto-seeded on first startup with the classic Tour of Heroes sample dataset
+- file is runtime-generated and ignored by Git
+
 If you use VS Code, a `.vscode` debug configuration is available for:
 
 - `.NET 9 Launch WebCore9.Api`
@@ -104,7 +110,10 @@ Useful routes after startup:
 
 - `http://localhost:4200/health` (M2.C health/status pilot)
 - `http://localhost:4200/modules` (M2.D home modules catalog pilot)
-- `http://localhost:4200/heroes` (M3.A heroes slice: read/search/detail + CRUD base)
+- `http://localhost:4200/heroes` (M3.A heroes slice: read/search/detail + CRUD + parity UX base)
+- `http://localhost:4200/heroes/dashboard` (Module2 parity route: top heroes dashboard)
+- `http://localhost:4200/heroes/search` (Module2 parity route: dedicated live search)
+- `http://localhost:4200/heroes/20` (Module2 parity route: dedicated hero detail/save-back flow)
 
 Build the modern client:
 

@@ -84,5 +84,8 @@ La pipeline `ci-legacy.yml` può essere ridotta/rimossa progressivamente quando 
 
 - `ClientModern` non aveva un gate lint nativo; in questa fase è stato introdotto un gate statico transitorio (`typecheck`) esposto come `npm run lint`.
 - L'estensione `Heroes` CRUD non richiede cambi CI aggiuntivi: rientra gia' nei gate `backend-webcore9` (integration tests) e `client-modern` (build/test).
+- I miglioramenti parity UX `Module2` su `ClientModern /heroes` (messages, delete confirm, empty/filter UX) non richiedono nuovi job CI; sono coperti da `client-modern` build/test e smoke manuale guidato.
+- L'introduzione delle route `ClientModern /heroes/dashboard`, `/heroes/search`, `/heroes/:id` non richiede cambi backend/CI: riusano `GET /api/heroes*` e i gate client esistenti.
+- La persistenza `Heroes` su file JSON (`App_Data/heroes-store.json`) non richiede nuovi job CI; il file viene seedato runtime e non e' versionato.
 - Il job legacy usa `windows-latest` per allinearsi meglio alla validazione locale già eseguita (Node 20 + Webpack 2).
 - Il test backend locale può fallire se `WebCore9.Api` è in esecuzione in debug (file lock); in CI il job parte da ambiente pulito.
