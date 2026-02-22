@@ -1,0 +1,42 @@
+:root {
+  --text-color: #1d2939;
+  --muted-color: #667085;
+  --border-color: #d0d5dd;
+  --surface-1: #ffffff;
+  --surface-2: #f8fafc;
+  --accent-color: #0f766e;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--text-color);
+  background:
+    radial-gradient(circle at 10% 10%, rgba(15, 118, 110, 0.14), transparent 38%),
+    radial-gradient(circle at 90% 0%, rgba(14, 116, 144, 0.12), transparent 35%),
+    linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+}
+
+app-root,
+sg-root {
+  display: block;
+  min-height: 100vh;
+  padding: 1.25rem;
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+code {
+  background: rgba(15, 23, 42, 0.06);
+  padding: 0.12rem 0.35rem;
+  border-radius: 6px;
+}

@@ -1,0 +1,59 @@
+:host {
+  display: block;
+}
+
+.app-shell__header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted-color);
+}
+
+h1 {
+  margin: 0.25rem 0 0;
+  font-size: clamp(1.4rem, 2vw, 2rem);
+}
+
+.app-shell__nav {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.app-shell__nav a {
+  text-decoration: none;
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  padding: 0.45rem 0.8rem;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.app-shell__nav a:hover,
+.app-shell__nav a:focus-visible {
+  background: var(--surface-2);
+  border-color: var(--accent-color);
+  outline: none;
+}
+
+.app-shell__nav a.is-active {
+  background: var(--accent-color);
+  color: white;
+  border-color: var(--accent-color);
+}
+
+.app-shell__main {
+  display: block;
+}
