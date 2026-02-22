@@ -6,8 +6,11 @@ Queste linee guida definiscono regole operative, stile collaborativo e criteri d
 Obiettivo principale: migrare in modo progressivo e controllato il progetto da stack legacy a stack moderno, mantenendo continuità funzionale e qualità del codice.
 
 Contesto attuale (da verificare nella fase iniziale):
-- Back-end legacy su `.NET Framework 4.8` (o versione vicina) con `ASP.NET MVC 5`.
-- Front-end su Angular legacy con build Webpack personalizzata.
+- Repository ibrido con:
+  - back-end legacy su `.NET Framework 4.8` con `ASP.NET MVC 5` (`Server/WebApplication`)
+  - back-end moderno `ASP.NET Core` su `.NET 9` (`Server/WebCore9`)
+- Front-end su Angular legacy con build Webpack personalizzata (`Client/`).
+- Il porting complessivo non è ancora completo: convivono stack legacy e stack moderno.
 
 Target evolutivo:
 - Back-end su `ASP.NET Core` / `.NET 9`.
@@ -108,11 +111,15 @@ Usare questa checklist come base e adattarla al task richiesto. La checklist va 
 
 ## Struttura del Progetto e Organizzazione dei Moduli
 
-Questo repository è suddiviso in `Client/` (Angular + Webpack) e `Server/` (ASP.NET MVC 5).
+Questo repository è suddiviso in `Client/` (Angular + Webpack legacy) e `Server/` (stack ibrido MVC5 + ASP.NET Core).
 
 - `Client/modules/`: codice sorgente Angular, bootstrap condiviso, polyfill e moduli funzionali (`angularModule-1`, `angularModule-2`).
 - `Client/webpack*.js`: configurazioni di build Webpack per build normali e con HTML plugin.
 - `Server/WebApplication/`: applicazione MVC (`Controllers/`, `Views/`, `Content/`, `Scripts/`, `App_Start/`).
+- `Server/WebCore9/WebCore9.Api/`: API `ASP.NET Core .NET 9` (entrypoint `Program.cs`, controller REST, OpenAPI).
+- `Server/WebCore9/WebCore9.Core/`: contratti, modelli DTO, astrazioni applicative.
+- `Server/WebCore9/WebCore9.Infrastructure/`: implementazioni servizi e wiring infrastrutturale.
+- `Server/WebCore9/WebCore9.Api.IntegrationTests/`: test di integrazione del backend moderno.
 - `Server/Web-Core.sln`: soluzione Visual Studio per l'applicazione server.
 
 Mantieni le modifiche client e server limitate alle rispettive cartelle, salvo cambiamenti del contratto di integrazione.
@@ -130,6 +137,14 @@ Esegui i comandi client da `Client/`.
 
 Avvia l'app MVC aprendo `Server/Web-Core.sln` in Visual Studio e premendo `F5` / `Ctrl+F5`.
 
+Per il backend moderno (`WebCore9.Api`), dal root del repository o da `Server/WebCore9/`:
+
+- `dotnet build Server/WebCore9/WebCore9.Api/WebCore9.Api.csproj`
+- `dotnet run --project Server/WebCore9/WebCore9.Api/WebCore9.Api.csproj`
+- `dotnet test Server/WebCore9/WebCore9.Api.IntegrationTests/WebCore9.Api.IntegrationTests.csproj`
+
+Nota di compatibilità toolchain: il client legacy (`Angular 4` + `Webpack 2`) può richiedere una versione Node più vecchia rispetto a versioni Node moderne (ad esempio Node 20).
+
 ## Stile di Codifica e Convenzioni di Naming
 
 Usa le convenzioni già presenti nel progetto:
@@ -143,13 +158,16 @@ Esegui `npm run lint` prima di aprire una PR.
 
 ## Linee Guida per i Test
 
-In questo repository non è ancora presente una suite di test automatizzati (nessun `*.spec.ts` o progetto di test server versionato).
+In questo repository non è presente una suite di test UI Angular moderna; il front-end legacy non include `*.spec.ts` versionati.
+È invece presente una suite di test di integrazione per il backend moderno in `Server/WebCore9/WebCore9.Api.IntegrationTests/`.
 
 Validazione minima per i contributi:
 
 - `npm run lint`
 - `npm run build:prod`
 - Smoke test dell'app MVC tramite Visual Studio (`Server/Web-Core.sln`)
+- `dotnet build Server/WebCore9/WebCore9.Api/WebCore9.Api.csproj`
+- `dotnet test Server/WebCore9/WebCore9.Api.IntegrationTests/WebCore9.Api.IntegrationTests.csproj`
 
 Se aggiungi test, posiziona gli spec Angular accanto ai file sorgente come `*.spec.ts` e documenta come eseguirli.
 
