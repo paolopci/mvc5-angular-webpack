@@ -19,6 +19,11 @@ export const routes: Routes = [
       )
   },
   {
+    path: 'heroes',
+    loadComponent: () =>
+      import('./features/heroes/heroes-page.component').then((m) => m.HeroesPageComponent)
+  },
+  {
     path: '**',
     redirectTo: 'health'
   }

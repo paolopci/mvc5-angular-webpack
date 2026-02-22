@@ -14,6 +14,16 @@ public static class ApiProblemDetailsFactory
         };
     }
 
+    public static ProblemDetails HeroIdNotFound(int id)
+    {
+        return new ProblemDetails
+        {
+            Title = "Hero not found",
+            Detail = $"Hero id '{id}' is not supported.",
+            Status = StatusCodes.Status404NotFound
+        };
+    }
+
     public static ProblemDetails ValidationFailed(string detail, string? title = null)
     {
         return new ProblemDetails

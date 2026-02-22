@@ -49,6 +49,24 @@ public sealed class ProducesApiModuleResponseAttribute : ProducesApiOkResponseAt
 }
 
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+public sealed class ProducesApiHeroesListResponseAttribute : ProducesApiOkResponseAttribute
+{
+    public ProducesApiHeroesListResponseAttribute()
+        : base(typeof(IReadOnlyList<HeroDto>))
+    {
+    }
+}
+
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+public sealed class ProducesApiHeroResponseAttribute : ProducesApiOkResponseAttribute
+{
+    public ProducesApiHeroResponseAttribute()
+        : base(typeof(HeroDto))
+    {
+    }
+}
+
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
 public sealed class ProducesApiLoaderResponseAttribute : ProducesApiOkResponseAttribute
 {
     public ProducesApiLoaderResponseAttribute()

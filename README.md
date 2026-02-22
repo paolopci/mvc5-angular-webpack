@@ -45,6 +45,11 @@ Related migration docs (M1 backend):
 Related migration docs (M2 client):
 - `docs/migration/client-legacy-inventory-m2a.md`
 - `docs/migration/client-modern-strategy-m2b.md`
+- `docs/migration/m2d-home-modules-pilot.md`
+- `docs/migration/m2e-toolchain-coexistence.md`
+
+Related migration docs (M3 slices):
+- `docs/migration/m3a-feature-slice-priority-and-mapping.md`
 
 Recommend to use Visual Studio Code for Angular development and Visual Studio 2017 to run the MVC application.
 
@@ -84,6 +89,27 @@ If you use VS Code, a `.vscode` debug configuration is available for:
 
 It builds `WebCore9.Api`, starts the API, and opens the browser automatically.
 
+## Run the Modern Client (ClientModern / Angular 21)
+
+From `ClientModern/`:
+
+```bash
+npm install
+npm start
+```
+
+Useful routes after startup:
+
+- `http://localhost:4200/health` (M2.C health/status pilot)
+- `http://localhost:4200/modules` (M2.D home modules catalog pilot)
+- `http://localhost:4200/heroes` (M3.A heroes read/search/detail slice)
+
+Build the modern client:
+
+```bash
+npm run build
+```
+
 ## Run the Legacy MVC5 + Angular/Webpack Application
 
 - Clone or download the repository. It will contain **Server** and **Client** folders.
@@ -92,6 +118,10 @@ It builds `WebCore9.Api`, starts the API, and opens the browser automatically.
 - Open Web-Core.sln in Visual Studio, press `F5` or `Ctrl + F5` to run the web application.
 
 Note: the legacy client (`Angular 4` + `Webpack 2`) may require an older Node.js version than modern Node releases (for example Node 20 can cause compatibility issues depending on packages/tooling).
+
+Current local validation (this repo state):
+- `Node 20.19.6` + `npm 10.8.2` successfully executed `Client/npm install` and `Client/npm run build:prod`
+- `Client/npm run lint` currently fails due to legacy lint issues in the source (not necessarily Node incompatibility)
 
 If everything works fine, you will see the screenshot below.
 
