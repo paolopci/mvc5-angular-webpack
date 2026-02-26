@@ -1,0 +1,66 @@
+name: CI Legacy (Transitional)
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-legacy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  client-legacy-build:
+    name: Legacy Client (Angular 4/Webpack 2) - build
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: Client
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: Client/npm-shrinkwrap.json
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build production bundles
+        run: npm run build:prod
+
+      - name: Smoke generated MVC host artifacts
+        shell: powershell
+        run: |
+          if (-not (Test-Path ..\Server\WebApplication\Views\Home\Index.cshtml)) {
+            throw "Missing generated MVC host file: Server/WebApplication/Views/Home/Index.cshtml"
+          }
+
+  client-legacy-lint-advisory:
+    name: Legacy Client lint (advisory)
+    runs-on: windows-latest
+    continue-on-error: true
+    defaults:
+      run:
+        working-directory: Client
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: Client/npm-shrinkwrap.json
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Lint (known legacy issues may fail)
+        run: npm run lint
+

@@ -1,0 +1,117 @@
+name: CI Modern
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-modern-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend-webcore9:
+    name: Modern Backend (.NET 9) - build + integration tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Restore WebCore9.Api
+        run: dotnet restore Server/WebCore9/WebCore9.Api/WebCore9.Api.csproj
+
+      - name: Build WebCore9.Api
+        run: dotnet build Server/WebCore9/WebCore9.Api/WebCore9.Api.csproj --configuration Release --no-restore
+
+      - name: Run integration tests
+        run: dotnet test Server/WebCore9/WebCore9.Api.IntegrationTests/WebCore9.Api.IntegrationTests.csproj --configuration Release -p:UseSharedCompilation=false
+
+  client-modern:
+    name: Modern Client (Angular 21) - lint + build + test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ClientModern
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: ClientModern/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint (transitional typecheck gate)
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Unit tests
+        run: npm run test -- --watch=false
+
+      - name: Smoke client dist output
+        shell: bash
+        run: |
+          test -f dist/ClientModern/browser/index.html
+          grep -q "<!doctype html>" dist/ClientModern/browser/index.html
+
+  smoke-api:
+    name: Smoke API (/api/health, /api/home)
+    runs-on: ubuntu-latest
+    needs: backend-webcore9
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Start WebCore9.Api (HTTP)
+        shell: bash
+        run: |
+          dotnet run --project Server/WebCore9/WebCore9.Api/WebCore9.Api.csproj --urls http://127.0.0.1:5021 > webcore9-api.log 2>&1 &
+          echo $! > webcore9-api.pid
+
+      - name: Wait for API startup
+        shell: bash
+        run: |
+          for i in {1..30}; do
+            if curl -sf http://127.0.0.1:5021/api/health > /dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "API did not become ready in time"
+          cat webcore9-api.log || true
+          exit 1
+
+      - name: Smoke /api/health
+        shell: bash
+        run: |
+          curl -sf http://127.0.0.1:5021/api/health | tee health.json
+          grep -q '"success":true' health.json
+
+      - name: Smoke /api/home
+        shell: bash
+        run: |
+          curl -sf http://127.0.0.1:5021/api/home | tee home.json
+          grep -q '"success":true' home.json
+
+      - name: Stop API
+        if: always()
+        shell: bash
+        run: |
+          if [ -f webcore9-api.pid ]; then kill "$(cat webcore9-api.pid)" || true; fi
+          cat webcore9-api.log || true
